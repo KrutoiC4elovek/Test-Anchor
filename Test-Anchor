@@ -1,0 +1,43 @@
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/KrutoiC4elovek/NEW-LIB/refs/heads/main/NEW-LIB"))()
+
+local Window = OrionLib:MakeWindow({
+    Name = "Test Anchor Cheat",
+    HidePremium = false,
+    SaveConfig = false,
+    IntroText = "Anchor HRP Test"
+})
+
+local Tab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local isAnchored = false
+local player = game.Players.LocalPlayer
+
+Tab:AddButton({
+    Name = "Toggle HRP Anchor",
+    Callback = function()
+        isAnchored = not isAnchored
+        
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+            hrp.Anchored = isAnchored
+            OrionLib:MakeNotification({
+                Name = "Anchor Status",
+                Content = "HRP is now " .. (isAnchored and "Anchored" or "Unanchored"),
+                Time = 2
+            })
+        else
+            OrionLib:MakeNotification({
+                Name = "Error",
+                Content = "Character or HRP not found!",
+                Time = 2
+            })
+        end
+    end
+})
+
+OrionLib:Init()
