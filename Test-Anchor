@@ -1,4 +1,5 @@
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/KrutoiC4elovek/NEW-LIB/refs/heads/main/NEW-LIB"))()
+local RunService = game:GetService("RunService")
 
 local Window = OrionLib:MakeWindow({
     Name = "Test Anchor Cheat",
@@ -15,29 +16,60 @@ local Tab = Window:MakeTab({
 
 local isAnchored = false
 local player = game.Players.LocalPlayer
+local anchorConnection
+
+local function updateAnchorState()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Torso") then
+        local hrp = character.HumanoidRootPart
+        local torso = character.Torso
+        local ragdollSocket = torso:FindFirstChild("Ragdollballsocket")
+
+        hrp.Anchored = isAnchored
+        torso.Anchored = isAnchored
+        if ragdollSocket then
+            ragdollSocket.Anchored = isAnchored
+        end
+    end
+end
 
 Tab:AddButton({
     Name = "Toggle HRP Anchor",
     Callback = function()
         isAnchored = not isAnchored
-        
+
         local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local hrp = character.HumanoidRootPart
-            hrp.Anchored = isAnchored
+        if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Torso") then
+            updateAnchorState()
             OrionLib:MakeNotification({
                 Name = "Anchor Status",
-                Content = "HRP is now " .. (isAnchored and "Anchored" or "Unanchored"),
+                Content = "HRP and Torso are now " .. (isAnchored and "Anchored" or "Unanchored"),
                 Time = 2
             })
+
+            if isAnchored and not anchorConnection then
+                anchorConnection = RunService.Heartbeat:Connect(updateAnchorState)
+            elseif not isAnchored and anchorConnection then
+                anchorConnection:Disconnect()
+                anchorConnection = nil
+            end
         else
             OrionLib:MakeNotification({
                 Name = "Error",
-                Content = "Character or HRP not found!",
+                Content = "Character, HRP, or Torso not found!",
                 Time = 2
             })
         end
     end
 })
+
+player.CharacterAdded:Connect(function(character)
+    if isAnchored then
+        updateAnchorState()
+        if not anchorConnection then
+            anchorConnection = RunService.Heartbeat:Connect(updateAnchorState)
+        end
+    end
+end)
 
 OrionLib:Init()
